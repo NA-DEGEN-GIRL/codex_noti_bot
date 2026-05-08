@@ -1,0 +1,7 @@
+# Copy this file to a private secret file. Do not commit the real file.
+
+TELEGRAM_LLM_NOTI_BOT_TOKEN=123456789:replace_with_bot_token
+OWNER_ACCOUNT_ID=123456789
+
+# Optional tuning.
+LLM_NOTI_ENABLED=true

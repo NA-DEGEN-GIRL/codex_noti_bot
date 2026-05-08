@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+*.env
+telegram_notify.env
+state.json
+notify.log
