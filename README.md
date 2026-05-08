@@ -79,12 +79,22 @@ The session id is sent as Telegram MarkdownV2 inline code so it is easy to tap o
 
 ## Codex Instruction
 
-Add this to your global Codex instructions on each machine:
+The most reliable setup is to add a top-level `AGENTS.md` under the workspace root that contains the completion instruction. For this machine, `/home/na_stream/AGENTS.md` is used so every repo under `/home/na_stream` sees it.
+
+Example:
 
 ```text
 작업을 완료하고 final 답변을 보내기 직전에 다음 명령으로 Telegram 알림을 보낸다:
 python3 ~/.codex/hooks/telegram_notify.py --send-now --summary "<완료한 작업 요약>"
 ```
+
+You can also point Codex at a global instruction file from `~/.codex/config.toml`:
+
+```toml
+model_instructions_file = "/home/na_stream/.codex/global_instructions.md"
+```
+
+This repo includes `codex_global_instructions.md` as a template. Existing already-running sessions may not reload this automatically; start a new Codex session, or resume from a newly launched Codex process, for the cleanest result.
 
 ## Owner-Only Use
 
