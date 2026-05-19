@@ -40,6 +40,13 @@ OWNER_ID_KEYS = [
     "CHAT_ID",
 ]
 
+WORKLOG_CHAT_ID_KEYS = [
+    "AI_WORKLOG_CHAT_ID",
+    "TELEGRAM_WORKLOG_CHAT_ID",
+    "WORKLOG_CHAT_ID",
+    "TELEGRAM_GROUP_CHAT_ID",
+]
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -71,6 +78,20 @@ def main() -> int:
 
     if args.send_now:
         summary = args.summary or args.message
+        if should_skip_legacy_dm(config):
+            write_json(
+                STATE_FILE,
+                {
+                    "mode": "legacy-dm-skipped",
+                    "cwd": os.getcwd(),
+                    "summary": summary,
+                    "thread_id": codex_thread_id(),
+                    "last_skipped_at": time.time(),
+                    "reason": "ai-worklog-topic-enabled",
+                },
+            )
+            log("legacy DM completion notifier skipped because AI Worklog topic is configured")
+            return 0
         ok = send_now(config, summary)
         write_json(
             STATE_FILE,
@@ -199,6 +220,21 @@ def first_value(config: dict, keys: list[str]) -> str | None:
 def is_disabled(config: dict) -> bool:
     value = str(config.get("LLM_NOTI_ENABLED", "true")).lower()
     return value in {"0", "false", "no", "off"}
+
+
+def bool_config(config: dict, key: str, default: bool = False) -> bool:
+    value = config.get(key)
+    if value is None or value == "":
+        return default
+    return str(value).strip().lower() not in {"0", "false", "no", "off"}
+
+
+def should_skip_legacy_dm(config: dict) -> bool:
+    if bool_config(config, "LLM_NOTI_LEGACY_DM_ENABLED", default=False):
+        return False
+    if bool_config(config, "AI_WORKLOG_ONLY", default=False):
+        return True
+    return bool(first_value(config, WORKLOG_CHAT_ID_KEYS))
 
 
 def tool_name(event: dict) -> str:

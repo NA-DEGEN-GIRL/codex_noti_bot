@@ -1,7 +1,28 @@
 # Copy this file to a private secret file. Do not commit the real file.
+# Recommended private path: ~/.codex/telegram_notify.env
 
-TELEGRAM_LLM_NOTI_BOT_TOKEN=123456789:replace_with_bot_token
-OWNER_ACCOUNT_ID=123456789
+# Existing one-shot completion notification bot/chat. OWNER_ACCOUNT_ID is usually
+# your personal Telegram account id or the private chat id used for completion pings.
+TELEGRAM_LLM_NOTI_BOT_TOKEN=replace_with_completion_bot_token
+OWNER_ACCOUNT_ID=replace_with_owner_or_private_chat_id
+# Default false when AI Worklog topic config exists. Set true only for legacy DM tests.
+# LLM_NOTI_LEGACY_DM_ENABLED=false
+
+# AI worklog forum-topic bot/group. If you use the same bot token as above, you
+# may omit AI_WORKLOG_BOT_TOKEN because ai_worklog.py falls back to the token above.
+AI_WORKLOG_BOT_TOKEN=replace_with_worklog_bot_token
+AI_WORKLOG_CHAT_ID=replace_with_forum_supergroup_chat_id_like_-1001234567890
+AI_WORKLOG_AUTO_CREATE_TOPICS=true
+# Optional: force all messages into one known topic instead of per-project topics.
+# AI_WORKLOG_TOPIC_ID=replace_with_message_thread_id
 
 # Optional tuning.
 LLM_NOTI_ENABLED=true
+AI_WORKLOG_ENABLED=true
+# Prefer AI Worklog topic as the only Codex completion/worklog signal.
+AI_WORKLOG_ONLY=true
+# Default false: keep Telegram messages compact; local JSONL still stores changed files.
+# AI_WORKLOG_SHOW_FILES=false
+# Default false: keep Telegram messages compact; local JSONL still stores git state.
+# AI_WORKLOG_SHOW_GIT=false
+# AI_WORKLOG_TOPIC_MAP=~/.local/state/codex-ai-worklog/topics.json
