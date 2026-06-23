@@ -32,6 +32,32 @@ Do not also send the old direct-message completion notifier for Codex sessions u
 - `answer-summary`: summarize the final answer/result.
 - `changes`: include changed paths, verification commands, or explicitly say no files changed.
 
+## Restore from a nonce
+
+Every `--send-turn` also snapshots the working tree — tracked changes plus untracked files, the same set as `git add -A` — into a `refs/worklog/<nonce>` git ref, without touching the working tree, index, or any branch. This makes any recorded turn restorable even when no manual `git commit` was made — which is the usual cause of fragile, guess-based reconstruction. (If the tree is clean / identical to HEAD, no ref is created and the snapshot status is `skipped:no-changes`.)
+
+To find a restorable nonce, list recent records:
+
+```bash
+python3 ~/.codex/hooks/ai_worklog.py --list        # newest 20; --list 50 for more
+```
+
+When the user hands you a nonce (e.g. copied from the Telegram worklog) and wants to resume or restore, run one command:
+
+```bash
+python3 ~/.codex/hooks/ai_worklog.py --restore <nonce>
+```
+
+It prints a context briefing (`user` / `answer` / `changes` / `git base` / changed files) and then restores that turn's working tree, after first backing up the current state to a `refs/worklog-backup/<nonce>-<ts>` ref (so the restore is reversible). Use `--restore <nonce> --dry-run` to preview the briefing and diff without changing files.
+
+Notes:
+- Restore is an **overlay** (`git restore --overlay`): the snapshot's files are written/updated, and files NOT in the snapshot are left untouched — nothing is deleted. The previous state is also saved in the pre-restore backup ref.
+- If the pre-restore backup cannot be created, restore **aborts** (exit 1) rather than overwrite without an undo ref. Pass `--force` to override.
+- If a nonce has no snapshot (clean turn, snapshots disabled, or the ref was pruned), restore prints the briefing only ("context-only") — re-orient from it.
+- `.gitignore`d files are not captured (build artifacts, caches), matching `git add -A`.
+- Snapshot refs are local to the project repo. Turn snapshots auto-prune to the newest `AI_WORKLOG_SNAPSHOT_KEEP` (default 500); pre-restore backups to `AI_WORKLOG_BACKUP_KEEP` (default 50). Set `AI_WORKLOG_SNAPSHOT=false` to disable snapshots.
+- A partial nonce prefix (≥6 chars) is accepted; the most recent matching record is used (a warning lists competing matches).
+
 ## Privacy rules
 
 - Do not include secrets, tokens, phone numbers, private account ids, or raw dotenv values.
